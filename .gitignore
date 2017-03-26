@@ -6,6 +6,7 @@
 
 #java class files
 *.class
+target
 
 #data files
 *.tsv
