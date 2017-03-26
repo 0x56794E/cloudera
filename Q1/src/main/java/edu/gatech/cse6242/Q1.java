@@ -16,49 +16,41 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 public class Q1 {
 
 	public static void main(String[] args) throws Exception {
-//		Configuration conf = new Configuration();
-//		Job job = Job.getInstance(conf, "Q1");
-//
-//		/* TODO: Needs to be implemented */
-//
-//		FileInputFormat.addInputPath(job, new Path(args[0]));
-//		FileOutputFormat.setOutputPath(job, new Path(args[1]));
-//		System.exit(job.waitForCompletion(true) ? 0 : 1);
-		
-		
-		
+		// Configuration conf = new Configuration();
+		// Job job = Job.getInstance(conf, "Q1");
+		//
+		// /* TODO: Needs to be implemented */
+		//
+		// FileInputFormat.addInputPath(job, new Path(args[0]));
+		// FileOutputFormat.setOutputPath(job, new Path(args[1]));
+		// System.exit(job.waitForCompletion(true) ? 0 : 1);
+
 		Configuration conf = new Configuration();
-	    Job job = Job.getInstance(conf, "Q1");
-	    
-	    
-	    job.setJarByClass(WordCount.class);
-	    job.setMapperClass(TokenizerMapper.class);
-	    job.setCombinerClass(IntSumReducer.class);
-	    job.setReducerClass(IntSumReducer.class);
-	    
-	    job.setOutputKeyClass(Text.class);
-	    job.setOutputValueClass(IntWritable.class);
-	    
-	    
-	    FileInputFormat.addInputPath(job, new Path(args[0]));
-	    FileOutputFormat.setOutputPath(job, new Path(args[1]));
-	    System.exit(job.waitForCompletion(true) ? 0 : 1);
-		
-		
-		
-		
+		Job job = Job.getInstance(conf, "Q1");
+
+		job.setJarByClass(Q1.class);
+		job.setMapperClass(TokenizerMapper.class);
+		job.setCombinerClass(IntSumReducer.class);
+		job.setReducerClass(IntSumReducer.class);
+
+		job.setOutputKeyClass(Text.class);
+		job.setOutputValueClass(IntWritable.class);
+
+		FileInputFormat.addInputPath(job, new Path(args[0]));
+		FileOutputFormat.setOutputPath(job, new Path(args[1]));
+		System.exit(job.waitForCompletion(true) ? 0 : 1);
+
 	}
 
 	public static class TokenizerMapper extends
 			Mapper<Object, Text, Text, IntWritable> {
 
 		private final static IntWritable one = new IntWritable(1);
-		private Integer nodeId;
-		
+		private Text word = new Text();
+
 		public void map(Object key, Text value, Context context)
 				throws IOException, InterruptedException {
 			StringTokenizer itr = new StringTokenizer(value.toString());
-			
 			while (itr.hasMoreTokens()) {
 				word.set(itr.nextToken());
 				context.write(word, one);

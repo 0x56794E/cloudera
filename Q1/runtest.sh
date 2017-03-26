@@ -1,0 +1,1 @@
+hadoop jar ./target/q1-1.0.jar edu.gatech.cse6242.Q1 /user/cse6242/input /user/cse6242/output
