@@ -2,6 +2,8 @@ package edu.gatech.cse6242;
 
 import java.io.IOException;
 import java.util.StringTokenizer;
+import java.util.Map;
+import java.util.HashMap;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -42,33 +44,78 @@ public class Q1 {
 
 	}
 
+	//Mapper<KeyIn, ValueIn, KeyOut, ValueOut>
 	public static class TokenizerMapper extends
-			Mapper<Object, Text, Text, IntWritable> {
+			Mapper<Object, Text, Text, IntWritable> 
+	{
+		//Key: target node ID; Value: weight
+		Map<String, Integer> weightMap = new HashMap<String, Integer>();
 
-		private final static IntWritable one = new IntWritable(1);
-		private Text word = new Text();
-
+		/**
+		 * Called once for ea key/value pair in input split
+		 * @param key: KeyIn
+		 * @param value: ValueIn
+		 */
+		@Override
 		public void map(Object key, Text value, Context context)
-				throws IOException, InterruptedException {
-			StringTokenizer itr = new StringTokenizer(value.toString());
-			while (itr.hasMoreTokens()) {
-				word.set(itr.nextToken());
-				context.write(word, one);
+				throws IOException, InterruptedException 
+		{
+			//StringTokenizer itr = new StringTokenizer(value.toString());
+			
+			//SRC TGT WT
+			String[] toks = value.toString().split("\\s+");
+			int wt = Integer.parseInt(toks[2]);
+			
+			//Either the map has NOT have the target node
+			//OR it has but the new weight is larger
+			if (!weightMap.containsKey(toks[1])
+					|| weightMap.get(toks[1]) < wt)
+				weightMap.put(toks[1], wt);
+		}
+		
+		/**
+		 * Called once at the end of ea task
+		 */
+		@Override
+		public void cleanup(Context context)
+				throws IOException, InterruptedException 
+		{
+			for (Map.Entry<String, Integer> entry : weightMap.entrySet())
+			{
+				context.write(new Text(entry.getKey()), new IntWritable(entry.getValue()));
 			}
 		}
 	}
 
 	public static class IntSumReducer extends
-			Reducer<Text, IntWritable, Text, IntWritable> {
+			Reducer<Text, IntWritable, Text, IntWritable> 
+	{
 		private IntWritable result = new IntWritable();
 
 		public void reduce(Text key, Iterable<IntWritable> values,
-				Context context) throws IOException, InterruptedException {
-			int sum = 0;
-			for (IntWritable val : values) {
-				sum += val.get();
+				Context context) throws IOException, InterruptedException 
+		{
+			
+			//TODO:
+			//Do sth like
+			/* OR keep a treeMap in the mapper???
+			 * maxWt, src
+			 * if wt_i > maxWt
+			 *    maxWt = wt_i
+			 *    src = src_i
+			 */
+			
+			int max = -1;
+			int curVal;
+			
+			for (IntWritable val : values)
+			{
+				curVal = val.get();
+				if (curVal > max)
+					max = curVal;
 			}
-			result.set(sum);
+			
+			result.set(max);
 			context.write(key, result);
 		}
 	}
