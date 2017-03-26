@@ -6,19 +6,40 @@ import org.apache.spark.SparkConf
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.functions._
 
-object Q2 {
+object Q2 
+{
 
-	def main(args: Array[String]) {
+	//Def the schema here
+	//(Infer the schema using reflection)
+	//TODO: MUST BE PLACED HERE
+	//NOT in the same method it's used!!! (God knows why)
+	case class Edge (src: String, tgt: String, weight: Int)
+	
+	def main(args: Array[String]) 
+	{
     	val sc = new SparkContext(new SparkConf().setAppName("Q2"))
 		val sqlContext = new SQLContext(sc)
 		import sqlContext.implicits._
 
     	// read the file
+    	//=> get this as RDD
     	val file = sc.textFile("hdfs://localhost:8020" + args(0))
+		
 		/* TODO: Needs to be implemented */
-
+		
+		//create data frame
+		val dataFrame = file.map(_.split(" ")).map(ed => Edge(ed(0), ed(1), ed(2).trim.toInt)).toDF()
+		
+		
+		//Filter for edges with weight != 1
+		dataFrame.show()
+		
+		dataFrame.printSchema()
+		
+		dataFrame.filter(dataFrame("weight") > 1).show()
+		
     	// store output on given HDFS path.
     	// YOU NEED TO CHANGE THIS
-    	file.saveAsTextFile("hdfs://localhost:8020" + args(1))
+    	//file.saveAsTextFile("hdfs://localhost:8020" + args(1))
   	}
 }
