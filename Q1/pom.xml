@@ -20,7 +20,7 @@
   <groupId>edu.gatech.cse6242</groupId>
   <artifactId>q1</artifactId>
   <name>Q1</name>
-
+	
   <repositories>
     <repository>
       <id>cloudera-repos</id>
