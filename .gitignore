@@ -1,0 +1,12 @@
+#Eclipse stuff
+../.project
+
+#emacs stuff
+*~
+
+#java class files
+*.class
+
+#data files
+*.tsv
+*.txt
