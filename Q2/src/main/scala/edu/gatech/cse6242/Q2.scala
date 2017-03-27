@@ -5,12 +5,20 @@ import org.apache.spark.SparkContext._
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.Row
 
 object Q2 
 {
 	//MUST BE PLACED HERE
 	//NOT in the same method it's used!!! (God knows why)
 	case class Edge (src: String, tgt: String, weight: Int)
+	
+	def fmt(row: Row):String =
+	{
+		val ret: String =  "%s %s".format(row(0), row(1))
+		
+		return ret
+	}
 	
 	def main(args: Array[String]) 
 	{
@@ -48,6 +56,6 @@ object Q2
 						
     	// store output on given HDFS path.
     	// YOU NEED TO CHANGE THIS
-    	retDF.rdd.saveAsTextFile("hdfs://localhost:8020" + args(1))
+    	retDF.rdd.map(row => row.mkString("\t")).saveAsTextFile("hdfs://localhost:8020" + args(1))
   	}
 }
