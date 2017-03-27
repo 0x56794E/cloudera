@@ -30,7 +30,6 @@ object Q2
 		//create data frame
 		val dataFrame = file.map(_.split(" ")).map(ed => Edge(ed(0), ed(1), ed(2).trim.toInt)).toDF()
 		
-		
 		//Filter for edges with weight != 1
 		//Outgoing weight
 		val outDF = dataFrame.filter(dataFrame("weight") > 1)
@@ -44,8 +43,9 @@ object Q2
 						.as("in_df")
 			
 		outDF.join(inDF, outDF("src") === inDF("tgt"), "outer")
-				.withColumn("W", col("outnW") - col("intW") )
-				.show()
+			  .na.fill(Map("outW" -> 0, "inW" -> 0))
+			  .withColumn("W", col("inW") - col("outW") )
+			  .show()
 						
     	// store output on given HDFS path.
     	// YOU NEED TO CHANGE THIS
