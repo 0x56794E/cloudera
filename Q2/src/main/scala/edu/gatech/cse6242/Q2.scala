@@ -28,7 +28,7 @@ object Q2
 		/* TODO: Needs to be implemented */
 		
 		//create data frame
-		val dataFrame = file.map(_.split(" ")).map(ed => Edge(ed(0), ed(1), ed(2).trim.toInt)).toDF()
+		val dataFrame = file.map(_.split("\\t")).map(ed => Edge(ed(0), ed(1), ed(2).trim.toInt)).toDF()
 		
 		//Filter for edges with weight != 1
 		//Outgoing weight
