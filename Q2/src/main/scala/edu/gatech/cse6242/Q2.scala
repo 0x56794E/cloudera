@@ -42,10 +42,12 @@ object Q2
 						.agg(sum("weight").as("inW"))
 						.as("in_df")
 			
-		outDF.join(inDF, outDF("src") === inDF("tgt"), "outer")
-			  .na.fill(Map("outW" -> 0, "inW" -> 0))
-			  .withColumn("W", col("inW") - col("outW") )
-			  .show()
+		val joinDF = outDF.join(inDF, outDF("src") === inDF("tgt"), "outer")
+						  .na.fill(Map("outW" -> 0, "inW" -> 0))
+						  .withColumn("W", col("inW") - col("outW"))
+			 
+	    joinDF.select(coalesce(joinDF("src"), joinDF("tgt")), joinDF("W"))
+	    	  .show()
 						
     	// store output on given HDFS path.
     	// YOU NEED TO CHANGE THIS
