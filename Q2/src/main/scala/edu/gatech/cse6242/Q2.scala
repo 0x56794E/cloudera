@@ -32,12 +32,21 @@ object Q2
 		
 		
 		//Filter for edges with weight != 1
-		dataFrame.show()
-		
-		dataFrame.printSchema()
-		
-		dataFrame.filter(dataFrame("weight") > 1).show()
-		
+		//Outgoing weight
+		val outDF = dataFrame.filter(dataFrame("weight") > 1)
+						.groupBy(dataFrame("src"))
+						.agg(sum("weight").as("outW"))
+						.as("out_df")
+			
+		val inDF = dataFrame.filter(dataFrame("weight") > 1)
+						.groupBy(dataFrame("tgt"))
+						.agg(sum("weight").as("inW"))
+						.as("in_df")
+			
+		outDF.join(inDF, outDF("src") === inDF("tgt"), "outer")
+				.withColumn("W", col("outnW") - col("intW") )
+				.show()
+						
     	// store output on given HDFS path.
     	// YOU NEED TO CHANGE THIS
     	//file.saveAsTextFile("hdfs://localhost:8020" + args(1))
