@@ -20,16 +20,33 @@ public class Q4
   public static void main(String[] args) throws Exception 
   {
 	  degreeJob(args[0], args[1]);
-	  
+	  //frequencyJob(tmpRes, args[1]);
   }
+  
+//  public void frequencyJob(String inputFile, String outputFile)
+//  {
+//	  Configuration conf = new Configuration();
+//	  Job job = Job.getInstance(conf, "Q4");
+//	
+//	  job.setJarByClass(Q4.class);
+//	  job.setMapperClass(DegreeMapper.class);
+//	  job.setCombinerClass(DegreeReducer.class);
+//	  job.setReducerClass(DegreeReducer.class);
+//	    
+//	  job.setOutputKeyClass(Text.class);
+//	  job.setOutputValueClass(IntWritable.class);
+//	    
+//	  FileInputFormat.addInputPath(job, new Path(inputFile));
+//	  FileOutputFormat.setOutputPath(job, new Path(outputFile));
+//	  System.exit(job.waitForCompletion(true) ? 0 : 1);
+//  }
   
   //Return the output filename to pass to next job
   //Tag (append to keep the path) with timestamp so don't have to del files 
   public static void degreeJob(String inputFile, String outputFile)
   				throws IOException, InterruptedException, ClassNotFoundException
   {
-	  ///String outputFile = String.format("%s_%s.tsv", inputFile, System.currentTimeMillis());
-	  //String outputFile = "/user/cse6242/q4outputsm"; //tmp
+	  //String outputFile = String.format("%s_%s.tsv", inputFile, System.currentTimeMillis());
 	  
 	  Configuration conf = new Configuration();
 	  Job job = Job.getInstance(conf, "Q4");
@@ -49,15 +66,29 @@ public class Q4
 	  //return outputFile;
   }
   
+//  public static class FrequencyMapper
+//  			extends Mapper<Object, Text, IntWritable, IntWritable>
+//  {
+//	  private final static IntWritable one = new IntWritable(1);
+//		
+//	  @Override
+//	  public void map(Object key, Text value, Context context)
+//				throws IOException, InterruptedException
+//	  {
+//		  //<node id> <degree>
+//		  String[] toks = value.toString();
+//	  }
+//  }
+  
   //Mapper<KeyIn, ValueInt, KeyOut, ValueOut>
+  //Key: node ID; Value: degree
   public static class DegreeMapper
   			extends Mapper<Object, Text, Text, IntWritable>
   {
-	  //Key: node ID; Value: degree
-	  Map<String, Integer> degMap = new HashMap<String, Integer>();
-	  
+	  private final static IntWritable one = new IntWritable(1);
+	  	
 	  /**
-	   * Called once for eavey key/val pair
+	   * Called once for eavey key/val pair (aka ea line)
 	   */
 	  @Override
 	  public void map(Object key, Text value, Context context)
@@ -72,29 +103,10 @@ public class Q4
 			  //Check BOTH nodes
 			  
 			  //Node A
-			  if (!degMap.containsKey(toks[0]))
-				  degMap.put(toks[0], 0);
-	
-			  degMap.put(toks[0], degMap.get(toks[0]) + 1);
+			  context.write(new Text(toks[0]), one);
 			  
 			  //Node B
-			  if (!degMap.containsKey(toks[1]))
-				  degMap.put(toks[1], 0);
-			  
-			  degMap.put(toks[1], degMap.get(toks[1]) + 1);
-		  }
-	  }
-	  
-	  /**
-	   * Called once at the end of ea task
-	   */
-	  @Override
-	  public void cleanup(Context context)
-	  		throws IOException, InterruptedException
-	  {
-		  for (Map.Entry<String, Integer> entry : degMap.entrySet())
-		  {	
-			  context.write(new Text(entry.getKey()), new IntWritable(entry.getValue()));			
+			  context.write(new Text(toks[1]), one);
 		  }
 	  }
   }
@@ -102,6 +114,16 @@ public class Q4
   public static class DegreeReducer
   			extends Reducer<Text, IntWritable, Text, IntWritable>
   {
-	  
+	  @Override
+	  public void reduce(Text key, Iterable<IntWritable> values,
+				Context context) throws IOException, InterruptedException 
+	  {
+			int sum = 0;
+			for (IntWritable val : values) 
+			{
+				sum += val.get();
+			}
+			context.write(key, new IntWritable(sum));
+	  }
   }
 }
