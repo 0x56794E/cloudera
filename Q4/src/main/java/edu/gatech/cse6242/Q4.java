@@ -23,7 +23,7 @@ public class Q4
 	  frequencyJob(tmpRes, args[1]);
   }
   
-  public void frequencyJob(String inputFile, String outputFile)
+  public static void frequencyJob(String inputFile, String outputFile)
 			throws IOException, InterruptedException, ClassNotFoundException
   {
 	  Configuration conf = new Configuration();
@@ -62,7 +62,7 @@ public class Q4
 	    
 	  FileInputFormat.addInputPath(job, new Path(inputFile));
 	  FileOutputFormat.setOutputPath(job, new Path(outputFile));
-	  System.exit(job.waitForCompletion(true) ? 0 : 1);
+	  job.waitForCompletion(true);
 	  
 	  return outputFile;
   }
