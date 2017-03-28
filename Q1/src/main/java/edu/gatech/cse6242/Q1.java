@@ -37,8 +37,8 @@ public class Q1
 
 		job.setJarByClass(Q1.class);
 		job.setMapperClass(TokenizerMapper.class);
-		job.setCombinerClass(IntSumReducer.class);
-		job.setReducerClass(IntSumReducer.class);
+		job.setCombinerClass(MaxReducer.class);
+		job.setReducerClass(MaxReducer.class);
 
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(IntWritable.class);
@@ -65,13 +65,11 @@ public class Q1
 		public void map(Object key, Text value, Context context)
 				throws IOException, InterruptedException 
 		{
-			//StringTokenizer itr = new StringTokenizer(value.toString());
-			
 			//SRC TGT WT
 			String[] toks = value.toString().split("\\s+");
 			int wt = Integer.parseInt(toks[2]);
 			
-			//Either the map has NOT have the target node
+			//Either the map has NOT had the target node
 			//OR it has but the new weight is larger
 			if (!weightMap.containsKey(toks[1])
 					|| weightMap.get(toks[1]) < wt)
@@ -92,7 +90,7 @@ public class Q1
 		}
 	}
 
-	public static class IntSumReducer extends
+	public static class MaxReducer extends
 			Reducer<Text, IntWritable, Text, IntWritable> 
 	{
 		private IntWritable result = new IntWritable();
@@ -100,16 +98,6 @@ public class Q1
 		public void reduce(Text key, Iterable<IntWritable> values,
 				Context context) throws IOException, InterruptedException 
 		{
-			
-			//TODO:
-			//Do sth like
-			/* OR keep a treeMap in the mapper???
-			 * maxWt, src
-			 * if wt_i > maxWt
-			 *    maxWt = wt_i
-			 *    src = src_i
-			 */
-			
 			int max = -1;
 			int curVal;
 			
