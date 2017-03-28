@@ -1,28 +1,36 @@
 package edu.gatech.cse6242;
 
-import org.apache.hadoop.fs.Path;
+import java.io.IOException;
+import java.util.StringTokenizer;
+import java.util.Map;
+import java.util.HashMap;
+
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.*;
-import org.apache.hadoop.mapreduce.*;
-import org.apache.hadoop.util.*;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import java.io.IOException;
 
 public class Q4 
 {
   public static void main(String[] args) throws Exception 
   {
-	  String interRes = degreeJob(args[0]);
+	  degreeJob(args[0], args[1]);
 	  
   }
   
   //Return the output filename to pass to next job
   //Tag (append to keep the path) with timestamp so don't have to del files 
-  public static String degreeJob(String inputFile)
+  public static void degreeJob(String inputFile, String outputFile)
+  				throws IOException, InterruptedException, ClassNotFoundException
   {
-	  String outputFile = String.format("%s_%s.tsv", inputFileName, System.currentTimeMillis());
-  
+	  ///String outputFile = String.format("%s_%s.tsv", inputFile, System.currentTimeMillis());
+	  //String outputFile = "/user/cse6242/q4outputsm"; //tmp
+	  
 	  Configuration conf = new Configuration();
 	  Job job = Job.getInstance(conf, "Q4");
 	
@@ -36,9 +44,9 @@ public class Q4
 	    
 	  FileInputFormat.addInputPath(job, new Path(inputFile));
 	  FileOutputFormat.setOutputPath(job, new Path(outputFile));
-	  //System.exit(job.waitForCompletion(true) ? 0 : 1);
+	  System.exit(job.waitForCompletion(true) ? 0 : 1);
 	  
-	  return outputFile;
+	  //return outputFile;
   }
   
   //Mapper<KeyIn, ValueInt, KeyOut, ValueOut>
@@ -46,7 +54,7 @@ public class Q4
   			extends Mapper<Object, Text, Text, IntWritable>
   {
 	  //Key: node ID; Value: degree
-	  Map<String, Integer> degMap = new HashMap<>();
+	  Map<String, Integer> degMap = new HashMap<String, Integer>();
 	  
 	  /**
 	   * Called once for eavey key/val pair
@@ -58,19 +66,23 @@ public class Q4
 		  //<node 1> <node 2>
 		  String[] toks = value.toString().split("\\s+");
 		  
-		  //Check BOTH nodes
-		  
-		  //Node A
-		  if (!degMap.containsKey(toks[0]))
-			  degMap.put(toks[0], 0);
-
-		  degMap.put(toks[0], degMap.get(toks[0]) + 1);
-		  
-		  //Node B
-		  if (!degMap.containsKey(toks[1]))
-			  degMap.put(toks[1], 0);
-		  
-		  degMap.put(toks[1], degMap.get(toks[1]) + 1);
+		  //Skip ill-formatted lines
+		  if (toks.length == 2)
+		  {
+			  //Check BOTH nodes
+			  
+			  //Node A
+			  if (!degMap.containsKey(toks[0]))
+				  degMap.put(toks[0], 0);
+	
+			  degMap.put(toks[0], degMap.get(toks[0]) + 1);
+			  
+			  //Node B
+			  if (!degMap.containsKey(toks[1]))
+				  degMap.put(toks[1], 0);
+			  
+			  degMap.put(toks[1], degMap.get(toks[1]) + 1);
+		  }
 	  }
 	  
 	  /**
@@ -78,6 +90,7 @@ public class Q4
 	   */
 	  @Override
 	  public void cleanup(Context context)
+	  		throws IOException, InterruptedException
 	  {
 		  for (Map.Entry<String, Integer> entry : degMap.entrySet())
 		  {	
