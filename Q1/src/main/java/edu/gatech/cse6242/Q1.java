@@ -21,17 +21,8 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
  */
 public class Q1 
 {
-
-	public static void main(String[] args) throws Exception {
-		// Configuration conf = new Configuration();
-		// Job job = Job.getInstance(conf, "Q1");
-		//
-		// /* TODO: Needs to be implemented */
-		//
-		// FileInputFormat.addInputPath(job, new Path(args[0]));
-		// FileOutputFormat.setOutputPath(job, new Path(args[1]));
-		// System.exit(job.waitForCompletion(true) ? 0 : 1);
-
+	public static void main(String[] args) throws Exception 
+	{
 		Configuration conf = new Configuration();
 		Job job = Job.getInstance(conf, "Q1");
 
@@ -53,9 +44,6 @@ public class Q1
 	public static class TokenizerMapper extends
 			Mapper<Object, Text, Text, IntWritable> 
 	{
-		//Key: target node ID; Value: weight
-		//Map<String, Integer> weightMap = new HashMap<String, Integer>();
-
 		/**
 		 * Called once for ea key/value pair in input split
 		 * @param key: KeyIn
@@ -71,31 +59,10 @@ public class Q1
 			//Ignore malformed lines
 			if (toks.length == 3)
 			{
-				int wt = Integer.parseInt(toks[2]);
-
-			     context.write(new Text(toks[1]), new IntWritable(wt));
-			     
-				//Either the map has NOT had the target node
-				//OR it has but the new weight is larger
-//				if (!weightMap.containsKey(toks[1])
-//						|| weightMap.get(toks[1]) < wt)
-//					weightMap.put(toks[1], wt);
+			     context.write(new Text(toks[1]), new IntWritable(Integer.parseInt(toks[2])));
 			}
 			
 		}
-		
-//		/**
-//		 * Called once at the end of ea task
-//		 */
-//		@Override
-//		public void cleanup(Context context)
-//				throws IOException, InterruptedException 
-//		{
-//			for (Map.Entry<String, Integer> entry : weightMap.entrySet())
-//			{
-//				context.write(new Text(entry.getKey()), new IntWritable(entry.getValue()));
-//			}
-//		}
 	}
 
 	public static class MaxReducer extends
