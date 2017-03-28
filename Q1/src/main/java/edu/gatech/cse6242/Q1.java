@@ -54,7 +54,7 @@ public class Q1
 			Mapper<Object, Text, Text, IntWritable> 
 	{
 		//Key: target node ID; Value: weight
-		Map<String, Integer> weightMap = new HashMap<String, Integer>();
+		//Map<String, Integer> weightMap = new HashMap<String, Integer>();
 
 		/**
 		 * Called once for ea key/value pair in input split
@@ -67,27 +67,35 @@ public class Q1
 		{
 			//SRC TGT WT
 			String[] toks = value.toString().split("\\s+");
-			int wt = Integer.parseInt(toks[2]);
 			
-			//Either the map has NOT had the target node
-			//OR it has but the new weight is larger
-			if (!weightMap.containsKey(toks[1])
-					|| weightMap.get(toks[1]) < wt)
-				weightMap.put(toks[1], wt);
+			//Ignore malformed lines
+			if (toks.length == 3)
+			{
+				int wt = Integer.parseInt(toks[2]);
+
+			     context.write(new Text(toks[1]), new IntWritable(wt));
+			     
+				//Either the map has NOT had the target node
+				//OR it has but the new weight is larger
+//				if (!weightMap.containsKey(toks[1])
+//						|| weightMap.get(toks[1]) < wt)
+//					weightMap.put(toks[1], wt);
+			}
+			
 		}
 		
-		/**
-		 * Called once at the end of ea task
-		 */
-		@Override
-		public void cleanup(Context context)
-				throws IOException, InterruptedException 
-		{
-			for (Map.Entry<String, Integer> entry : weightMap.entrySet())
-			{
-				context.write(new Text(entry.getKey()), new IntWritable(entry.getValue()));
-			}
-		}
+//		/**
+//		 * Called once at the end of ea task
+//		 */
+//		@Override
+//		public void cleanup(Context context)
+//				throws IOException, InterruptedException 
+//		{
+//			for (Map.Entry<String, Integer> entry : weightMap.entrySet())
+//			{
+//				context.write(new Text(entry.getKey()), new IntWritable(entry.getValue()));
+//			}
+//		}
 	}
 
 	public static class MaxReducer extends
