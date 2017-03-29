@@ -1,2 +1,6 @@
-#emacs tmp files
+# tmp files
 *~
+
+# data files
+*.tsv
+*.txt
