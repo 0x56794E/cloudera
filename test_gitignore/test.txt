@@ -1,1 +1,0 @@
-wth is wrong w gitignore
