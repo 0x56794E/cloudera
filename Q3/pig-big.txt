@@ -1,0 +1,14 @@
+
+raw_bigrams      = LOAD 's3://cse6242-2017spring-bigrams-big/*' using PigStorage('\t') AS (bigram:chararray, year:int, occur:int, books:int);
+
+bigram_gt_100    = FILTER raw_bigrams BY occur >= 100 AND books >= 20;
+
+bigram_freq      = GROUP bigram_gt_100 BY bigram;
+
+flat_bigram_freq = FOREACH bigram_freq GENERATE $0 as bigram, SUM(bigram_gt_100.occur) * 1.0 / SUM(bigram_gt_100.books) AS avg_book;
+
+ordered_bigram = ORDER flat_bigram_freq BY avg_book DESC;
+
+top_bigram = LIMIT ordered_bigram 10;
+
+STORE top_bigram INTO 's3://cse6242-vnguyen60/output-pig-big/';
