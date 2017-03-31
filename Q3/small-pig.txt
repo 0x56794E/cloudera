@@ -1,4 +1,4 @@
-raw_bigrams      = LOAD 'data.txt' using PigStorage('\t') AS (bigram:chararray, year:int, occur:int, books:int);
+raw_bigrams      = LOAD 's3://cse6242-2017spring-bigrams-small/*' using PigStorage('\t') AS (bigram:chararray, year:int, occur:int, books:int);
 
 bigram_gt_100    = FILTER raw_bigrams BY occur > 100;
 
@@ -10,6 +10,6 @@ ordered_bigram = ORDER flat_bigram_freq BY avg_book DESC;
 
 top_bigram = LIMIT ordered_bigram 2;
 
-STORE top_bigram INTO 'test_out.txt';
+STORE top_bigram INTO 'small-pig-out';
 
 
