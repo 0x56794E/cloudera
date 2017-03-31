@@ -1,0 +1,35 @@
+(a)
+-- The map function emits the key-value pairs where the key is the ID of the target node and the value is the weight of that edge. Because the map function only looks at the target node, naturally, nodes without incoming edges are ignored. 
+The output of the map function is as follows: (order is NOT guaranteed)
+<51, 1>
+<51, 1>
+<51, 3>
+<151, 51>
+<151, 79>
+<130, 10>
+
+-- The reduce function finds the max value among each key. The output of the is as follows: (again, order is NOT guaranteed)
+<51, 3>
+<151, 79>
+<130, 10>
+
+
+(b)
+- First, create a TaggedKey with a join order, and a corresponding Comparator. We'll use this to give key-value pairs of Department higher order (i.e., they'll appear first. More on this later.) => secondary sort
+
+- Second, in the Mapper's map function, do the following: (pseudo code)
+  for each input string:
+     tokenize the string
+     If the first token is Department
+        taggedKey: key=<the dept id (second token)>, order=0
+        remove the second token from the tokenized values
+     Else //first token is Student
+        taggedKey: key=<the dept id (third token)>, order=1
+        remove the third token from the tokenized values
+     write to context: <taggedKey, student_name|dept_name>
+     
+- Third, in the Reducer's reduce function, do the following:
+  for each key - Iterable<Value>:
+    Get the first item in the iterable => Guarantee to be the department entry
+    for the rest of the items in the collection
+        write to context <key, name => which is student_name, dept_name from the first entry>
