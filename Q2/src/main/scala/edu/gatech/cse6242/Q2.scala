@@ -22,13 +22,13 @@ object Q2
 	
 	def main(args: Array[String]) 
 	{
-    	val sc = new SparkContext(new SparkConf().setAppName("Q2"))
-		val sqlContext = new SQLContext(sc)
-		import sqlContext.implicits._
+	    	val sc = new SparkContext(new SparkConf().setAppName("Q2"))
+			val sqlContext = new SQLContext(sc)
+			import sqlContext.implicits._
 
-    	// read the file
-    	//=> get this as RDD
-    	val file = sc.textFile("hdfs://localhost:8020" + args(0))
+	    	// read the file
+	    	//=> get this as RDD
+	    	val file = sc.textFile("hdfs://localhost:8020" + args(0))
 		
 		/* TODO: Needs to be implemented */
 		
@@ -37,7 +37,7 @@ object Q2
 		
 		//Filter for edges with weight != 1
 		//Outgoing weight
-		val outDF = dataFrame.filter(dataFrame("weight") > 1)
+		val outDF = dataFrame.filter(dataFrame("weight") !== 1)
 						.groupBy(dataFrame("src"))
 						.agg(sum("weight").as("outW"))
 						.as("out_df")
@@ -52,10 +52,10 @@ object Q2
 						  .withColumn("W", col("inW") - col("outW"))
 		val retDF = joinDF.select(coalesce(joinDF("src"), joinDF("tgt")), joinDF("W"))
 			 
-	    retDF.show()
+	    	//retDF.show()
 						
-    	// store output on given HDFS path.
-    	// YOU NEED TO CHANGE THIS
-    	retDF.rdd.map(row => row.mkString("\t")).saveAsTextFile("hdfs://localhost:8020" + args(1))
+	    	// store output on given HDFS path.
+	    	// YOU NEED TO CHANGE THIS
+	    	retDF.rdd.map(row => row.mkString("\t")).saveAsTextFile("hdfs://localhost:8020" + args(1))
   	}
 }
